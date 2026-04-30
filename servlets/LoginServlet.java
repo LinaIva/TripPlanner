@@ -1,3 +1,6 @@
+package servlets;
+
+import dao.UserDAO;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;

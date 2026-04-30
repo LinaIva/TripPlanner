@@ -1,3 +1,6 @@
+package dao;
+
+import database.DBConnection;
 import java.sql.*;
 
 public class FriendDAO {
