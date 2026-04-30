@@ -44,8 +44,7 @@ public class TripServlet extends HttpServlet {
             ResultSet rs = tripDAO.getTripsByUser(userId);
 
             out.println("<table border='1'>");
-            out.println("<tr><th>ID</th><th>Title</th><th>Destination</th><th>Start</th><th>End</th></tr>");
-
+            out.println("<tr><th>ID</th><th>Title</th><th>Destination</th><th>Start</th><th>End</th><th>Action</th></tr>");
             while (rs.next()) {
                 out.println("<tr>");
                 out.println("<td>" + rs.getInt("id") + "</td>");
@@ -53,6 +52,7 @@ public class TripServlet extends HttpServlet {
                 out.println("<td>" + rs.getString("destination") + "</td>");
                 out.println("<td>" + rs.getDate("start_date") + "</td>");
                 out.println("<td>" + rs.getDate("end_date") + "</td>");
+                out.println("<td><a href='trip-details?tripId=" + rs.getInt("id") + "'>Open</a></td>");
                 out.println("</tr>");
             }
 

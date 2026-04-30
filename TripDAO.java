@@ -33,4 +33,25 @@ public class TripDAO {
 
         return ps.executeQuery();
     }
+
+    public String getTripTitle(int tripId) {
+        String sql = "SELECT title FROM trips WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, tripId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("title");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return "Unknown Trip";
+    }
 }
