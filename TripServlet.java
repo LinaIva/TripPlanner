@@ -24,6 +24,7 @@ public class TripServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         out.println("<html><body>");
+        out.println("<br><a href='friends'>Friends</a>");
         out.println("<h2>Your Trips</h2>");
         out.println("<p>Logged in as: " + username + "</p>");
         out.println("<p>Session ID: " + session.getId() + "</p>");
