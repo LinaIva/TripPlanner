@@ -30,7 +30,7 @@ public class FriendRequestsServlet extends HttpServlet {
 
         try {
             FriendDAO dao = new FriendDAO();
-            ResultSet rs = dao.getPendingRequests(userId);
+            ResultSet rs = dao.getWaitingRequests(userId);
 
             while (rs.next()) {
                 int requestId = rs.getInt("id");
