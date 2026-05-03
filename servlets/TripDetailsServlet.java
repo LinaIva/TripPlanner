@@ -2,6 +2,7 @@ package servlets;
 
 import dao.ActivityDAO;
 import dao.TripDAO;
+import dao.TripMemberDAO;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -42,7 +43,48 @@ public class TripDetailsServlet extends HttpServlet {
         out.println("<html><body>");
         out.println("<h2>" + tripTitle + "</h2>");
         out.println("<p>Trip ID: " + tripId + "</p>");
+        out.println("<p><a href='leave-trip?tripId=" + tripId + "'>Leave this trip</a></p>");
+        out.println("<h3>Trip members</h3>");
 
+        try {
+            TripMemberDAO memberDAO = new TripMemberDAO();
+            ResultSet members = memberDAO.getTripMembers(tripId);
+
+            out.println("<ul>");
+            while (members.next()) {
+                out.println("<li>" + members.getString("username") + "</li>");
+            }
+            out.println("</ul>");
+
+        } catch (Exception e) {
+            out.println("<p>Error loading trip members</p>");
+            e.printStackTrace();
+        }
+        out.println("<h3>Add friend to this trip</h3>");
+
+        try {
+            TripMemberDAO memberDAO = new TripMemberDAO();
+            int currentUserId = (int) session.getAttribute("userId");
+
+            ResultSet friends = memberDAO.getUserFriends(currentUserId);
+
+            while (friends.next()) {
+                int friendId = friends.getInt("id");
+                String friendName = friends.getString("username");
+
+                if (memberDAO.isMember(tripId, friendId)) {
+                    out.println("<p>" + friendName + " ✅ Already added</p>");
+                } else {
+                    out.println("<p>" + friendName +
+                            " <a href='add-trip-member?tripId=" + tripId +
+                            "&friendId=" + friendId + "'>Add to trip</a></p>");
+                }
+            }
+
+        } catch (Exception e) {
+            out.println("<p>Error loading friends</p>");
+            e.printStackTrace();
+        }
         out.println("<h3>Add plan</h3>");
         out.println("<form action='trip-details' method='post'>");
         out.println("Date: <input type='date' name='activityDate' required><br>");

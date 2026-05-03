@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS trip_members;
 DROP TABLE IF EXISTS friend_requests;
 DROP TABLE IF EXISTS friends;
 DROP TABLE IF EXISTS activities;
@@ -45,6 +46,14 @@ CREATE TABLE friends (
     friend_id INT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (friend_id) REFERENCES users(id)
+);
+CREATE TABLE trip_members (
+    id SERIAL PRIMARY KEY,
+    trip_id INT NOT NULL,
+    user_id INT NOT NULL,
+    FOREIGN KEY (trip_id) REFERENCES trips(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE (trip_id, user_id)
 );
 
 INSERT INTO users (username, password)

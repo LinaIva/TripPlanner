@@ -8,18 +8,29 @@ import java.sql.ResultSet;
 public class TripDAO {
 
     public void addTrip(String title, String destination, String startDate, String endDate, int userId) {
-        String sql = "INSERT INTO trips (title, destination, start_date, end_date, user_id) VALUES (?, ?, ?, ?, ?)";
+        String tripSql = "INSERT INTO trips (title, destination, start_date, end_date, user_id) VALUES (?, ?, ?, ?, ?) RETURNING id";
+        String memberSql = "INSERT INTO trip_members (trip_id, user_id) VALUES (?, ?) ON CONFLICT DO NOTHING";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement tripPs = conn.prepareStatement(tripSql)) {
 
-            ps.setString(1, title);
-            ps.setString(2, destination);
-            ps.setDate(3, java.sql.Date.valueOf(startDate));
-            ps.setDate(4, java.sql.Date.valueOf(endDate));
-            ps.setInt(5, userId);
+            tripPs.setString(1, title);
+            tripPs.setString(2, destination);
+            tripPs.setDate(3, java.sql.Date.valueOf(startDate));
+            tripPs.setDate(4, java.sql.Date.valueOf(endDate));
+            tripPs.setInt(5, userId);
 
-            ps.executeUpdate();
+            ResultSet rs = tripPs.executeQuery();
+
+            if (rs.next()) {
+                int tripId = rs.getInt("id");
+
+                try (PreparedStatement memberPs = conn.prepareStatement(memberSql)) {
+                    memberPs.setInt(1, tripId);
+                    memberPs.setInt(2, userId);
+                    memberPs.executeUpdate();
+                }
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -29,11 +40,14 @@ public class TripDAO {
     public ResultSet getTripsByUser(int userId) throws Exception {
         Connection conn = DBConnection.getConnection();
 
-        String sql = "SELECT * FROM trips WHERE user_id = ? ORDER BY start_date";
+        String sql = "SELECT DISTINCT t.* FROM trips t " +
+                "LEFT JOIN trip_members tm ON t.id = tm.trip_id " +
+                "WHERE t.user_id = ? OR tm.user_id = ? " +
+                "ORDER BY t.start_date";
 
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setInt(1, userId);
-
+        ps.setInt(2, userId);
         return ps.executeQuery();
     }
 
