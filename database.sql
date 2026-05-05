@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS chat_messages;
 DROP TABLE IF EXISTS trip_members;
 DROP TABLE IF EXISTS friend_requests;
 DROP TABLE IF EXISTS friends;
@@ -55,9 +56,16 @@ CREATE TABLE trip_members (
     FOREIGN KEY (user_id) REFERENCES users(id),
     UNIQUE (trip_id, user_id)
 );
+CREATE TABLE chat_messages (
+    id SERIAL PRIMARY KEY,
+    trip_id INT NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (trip_id) REFERENCES trips(id)
+);
 
-INSERT INTO users (username, password)
-VALUES ('admin', 'admin123'),
+INSERT INTO users (username, password) VALUES ('admin', 'admin123'),
         ('fred', 'fred'),
        ('alex', 'alex'),
         ('miu', 'miu');
@@ -72,5 +80,5 @@ VALUES (1, '2026-04-10', 'Hotel', 'Hotel Check-in', 'Check-in at Myeongdong Hote
     (1, '2026-04-11', 'Food', 'Korean BBQ Dinner', 'Dinner in Hongdae', 45),
     (1, '2026-04-12', 'Transport', 'AREX Train', 'Airport railroad ticket', 12);
 
-INSERT INTO friends (user_id, friend_id)
-VALUES (1, 2), (2, 1);
+INSERT INTO friends (user_id, friend_id) VALUES (1, 2), (2, 1);
+INSERT INTO trip_members (trip_id, user_id) SELECT id, user_id FROM trips ON CONFLICT DO NOTHING;

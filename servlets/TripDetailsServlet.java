@@ -1,5 +1,6 @@
 package servlets;
 
+import dao.ChatMessageDAO;
 import dao.ActivityDAO;
 import dao.TripDAO;
 import dao.TripMemberDAO;
@@ -73,7 +74,7 @@ public class TripDetailsServlet extends HttpServlet {
                 String friendName = friends.getString("username");
 
                 if (memberDAO.isMember(tripId, friendId)) {
-                    out.println("<p>" + friendName + " ✅ Already added</p>");
+                    out.println("<p>" + friendName + "  Already added</p>");
                 } else {
                     out.println("<p>" + friendName +
                             " <a href='add-trip-member?tripId=" + tripId +
@@ -132,9 +133,82 @@ public class TripDetailsServlet extends HttpServlet {
             out.println("<p>Error loading activities</p>");
             e.printStackTrace();
         }
-
         out.println("<br><a href='trips'>Back to trips</a>");
         out.println("<br><a href='logout'>Logout</a>");
+
+        String username = (String) session.getAttribute("username");
+
+        out.println("<style>");
+        out.println("#chatBox { position: fixed; right: 20px; bottom: 70px; width: 300px; height: 350px; border: 1px solid black; background: white; display: none; padding: 10px; }");
+        out.println("#messages { height: 240px; overflow-y: scroll; border: 1px solid gray; margin-bottom: 10px; padding: 5px; }");
+        out.println("#chatButton { position: fixed; right: 20px; bottom: 20px; }");
+        out.println("#newDot { color: red; display: none; font-size: 20px; }");
+        out.println("</style>");
+
+        out.println("<button id='chatButton' onclick='toggleChat()'>Chat <span id='newDot'>●</span></button>");
+
+        out.println("<div id='chatBox'>");
+        out.println("<button onclick='toggleChat()'>X</button>");
+        out.println("<h3>Trip Chat</h3>");
+
+        out.println("<div id='messages'>");
+
+        try {
+            ChatMessageDAO chatDAO = new ChatMessageDAO();
+            ResultSet chatRs = chatDAO.getLastMessages(tripId);
+
+            java.util.ArrayList<String> oldMessages = new java.util.ArrayList<>();
+
+            while (chatRs.next()) {
+                String user = chatRs.getString("username");
+                String msg = chatRs.getString("message");
+                oldMessages.add(user + ": " + msg);
+            }
+
+            for (int i = oldMessages.size() - 1; i >= 0; i--) {
+                out.println("<p>" + oldMessages.get(i) + "</p>");
+            }
+
+        } catch (Exception e) {
+            out.println("<p>Error loading chat history</p>");
+            e.printStackTrace();
+        }
+
+        out.println("</div>");
+
+        out.println("<input type='text' id='chatInput' placeholder='Message'>");
+        out.println("<button onclick='sendMessage()'>Send</button>");
+        out.println("</div>");
+
+        out.println("<script>");
+        out.println("let chatOpen = false;");
+        out.println("let username = '" + username + "';");
+        out.println("let ws = new WebSocket('ws://localhost:8080/tripplanner/trip-chat/" + tripId + "');");
+
+        out.println("ws.onmessage = function(event) {");
+        out.println("  let messages = document.getElementById('messages');");
+        out.println("  let p = document.createElement('p');");
+        out.println("  p.textContent = event.data;");
+        out.println("  messages.appendChild(p);");
+        out.println("  messages.scrollTop = messages.scrollHeight;");
+        out.println("  if (!chatOpen) { document.getElementById('newDot').style.display = 'inline'; }");
+        out.println("};");
+
+        out.println("function toggleChat() {");
+        out.println("  let box = document.getElementById('chatBox');");
+        out.println("  chatOpen = !chatOpen;");
+        out.println("  box.style.display = chatOpen ? 'block' : 'none';");
+        out.println("  if (chatOpen) { document.getElementById('newDot').style.display = 'none'; }");
+        out.println("}");
+
+        out.println("function sendMessage() {");
+        out.println("  let input = document.getElementById('chatInput');");
+        out.println("  if (input.value.trim() !== '') {");
+        out.println("    ws.send(username + ': ' + input.value);");
+        out.println("    input.value = '';");
+        out.println("  }");
+        out.println("}");
+        out.println("</script>");
         out.println("</body></html>");
     }
 
