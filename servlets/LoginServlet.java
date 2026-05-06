@@ -5,6 +5,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import java.io.*;
+import util.UserTracker;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
@@ -23,7 +24,7 @@ public class LoginServlet extends HttpServlet {
 
         if (valid) {
             int userId = userDAO.getUserId(username);
-
+            UserTracker.userLoggedIn(username);
             HttpSession session = request.getSession();
             session.setAttribute("userId", userId);
             session.setAttribute("username", username);

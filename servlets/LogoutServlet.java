@@ -1,4 +1,6 @@
 package servlets;
+
+import util.UserTracker;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -13,6 +15,10 @@ public class LogoutServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
 
         if (session != null) {
+            String username = (String) session.getAttribute("username");
+            if (username != null) {
+                UserTracker.userLoggedOut(username);
+            }
             session.invalidate();
         }
 
