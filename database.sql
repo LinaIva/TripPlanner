@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS trip_notes;
 DROP TABLE IF EXISTS chat_messages;
 DROP TABLE IF EXISTS trip_members;
 DROP TABLE IF EXISTS friend_requests;
@@ -63,6 +64,14 @@ CREATE TABLE chat_messages (
     message TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (trip_id) REFERENCES trips(id)
+);
+
+CREATE TABLE trip_notes (
+id SERIAL PRIMARY KEY,
+trip_id INT NOT NULL,
+note_text TEXT NOT NULL,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+FOREIGN KEY (trip_id) REFERENCES trips(id)
 );
 
 INSERT INTO users (username, password) VALUES ('admin', 'admin123'),

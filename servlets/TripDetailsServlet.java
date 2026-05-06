@@ -9,6 +9,9 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import java.io.*;
 import java.sql.ResultSet;
+import jpa.TripNoteEntity;
+import jpa.TripNoteService;
+import java.util.List;
 
 @WebServlet("/trip-details")
 public class TripDetailsServlet extends HttpServlet {
@@ -101,6 +104,28 @@ public class TripDetailsServlet extends HttpServlet {
         out.println("Price: <input type='number' step='0.01' name='price' value='0'><br>");
         out.println("<input type='submit' value='Add Activity'>");
         out.println("</form>");
+        out.println("<h3>Trip Notes (JPA)</h3>");
+
+        try {
+            TripNoteService noteService = new TripNoteService();
+            List<TripNoteEntity> notes = noteService.getNotesByTrip(tripId);
+
+            out.println("<form action='trip-details' method='post'>");
+            out.println("<input type='hidden' name='action' value='addNote'>");
+            out.println("Note: <input type='text' name='noteText' required>");
+            out.println("<input type='submit' value='Add Note'>");
+            out.println("</form>");
+
+            out.println("<ul>");
+            for (TripNoteEntity note : notes) {
+                out.println("<li>" + note.getNoteText() + " <small>(" + note.getCreatedAt() + ")</small></li>");
+            }
+            out.println("</ul>");
+
+        } catch (Throwable e) {
+            out.println("<p style='color:red;'>JPA notes error: " + e.getMessage() + "</p>");
+            e.printStackTrace();
+        }
 
         out.println("<h3>Planned activities</h3>");
 
@@ -228,7 +253,17 @@ public class TripDetailsServlet extends HttpServlet {
             response.sendRedirect("trips");
             return;
         }
+        String action = request.getParameter("action");
 
+        if ("addNote".equals(action)) {
+            String noteText = request.getParameter("noteText");
+
+            TripNoteService noteService = new TripNoteService();
+            noteService.addNote(tripId, noteText);
+
+            response.sendRedirect("trip-details");
+            return;
+        }
         String activityDate = request.getParameter("activityDate");
         String type = request.getParameter("type");
         String title = request.getParameter("title");
