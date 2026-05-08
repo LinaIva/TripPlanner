@@ -96,6 +96,7 @@ public class FriendDAO {
             ps.setInt(1, userId);
             ps.setInt(2, friendId);
             ResultSet rs = ps.executeQuery();
+            return rs.next();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
