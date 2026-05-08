@@ -27,6 +27,6 @@ replay_pid*
 .target/
 
 AGENTS.md
-.lectures/
+lectures/
 Assignment.pdf
 .DB_Store
