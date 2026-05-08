@@ -12,6 +12,13 @@ public class RegisterServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        HttpSession session = request.getSession(false);
+
+        if (session != null && session.getAttribute("username") != null) {
+            response.sendRedirect("trips");
+            return;
+        }
+
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
 
@@ -22,7 +29,7 @@ public class RegisterServlet extends HttpServlet {
         out.println("Password: <input type='password' name='password' required><br>");
         out.println("<input type='submit' value='Register'>");
         out.println("</form>");
-        out.println("<br><a href='index.html'>Back to login</a>");
+        out.println("<br><a href='login'>Back to login</a>");
         out.println("</body></html>");
     }
 
@@ -42,7 +49,7 @@ public class RegisterServlet extends HttpServlet {
 
         if (success) {
             out.println("<h2>Registration successful</h2>");
-            out.println("<a href='index.html'>Go to login</a>");
+            out.println("<a href='login'>Go to login</a>");
         } else {
             out.println("<h2>Registration failed</h2>");
             out.println("<p>Username may already exist.</p>");
