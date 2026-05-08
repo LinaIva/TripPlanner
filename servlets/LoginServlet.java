@@ -10,6 +10,31 @@ import util.UserTracker;
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+
+        if (session != null && session.getAttribute("username") != null) {
+            response.sendRedirect("trips");
+            return;
+        }
+
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        out.println("<!DOCTYPE html>");
+        out.println("<html><body>");
+        out.println("<h2>Travel Planner App</h2>");
+        out.println("<form action='login' method='post'>");
+        out.println("Username: <input type='text' name='username'><br>");
+        out.println("Password: <input type='password' name='password'><br>");
+        out.println("<input type='submit' value='Login'>");
+        out.println("</form>");
+        out.println("<p>No account? <a href='register'>Register</a></p>");
+        out.println("</body></html>");
+    }
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -57,7 +82,7 @@ public class LoginServlet extends HttpServlet {
             out.println("<a href='trips'>Go to trips</a>");
         } else {
             out.println("<h2>Invalid username or password</h2>");
-            out.println("<a href='index.html'>Try again</a>");
+            out.println("<a href='login'>Try again</a>");
         }
     }
 }
