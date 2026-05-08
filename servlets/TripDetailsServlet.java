@@ -39,6 +39,15 @@ public class TripDetailsServlet extends HttpServlet {
             return;
         }
 
+        int currentUserId = (int) session.getAttribute("userId");
+        TripMemberDAO accessDAO = new TripMemberDAO();
+
+        if (!accessDAO.isMember(tripId, currentUserId)) {
+            session.removeAttribute("currentTripId");
+            response.sendRedirect("trips");
+            return;
+        }
+
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
         TripDAO tripDAO = new TripDAO();
@@ -68,8 +77,6 @@ public class TripDetailsServlet extends HttpServlet {
 
         try {
             TripMemberDAO memberDAO = new TripMemberDAO();
-            int currentUserId = (int) session.getAttribute("userId");
-
             ResultSet friends = memberDAO.getUserFriends(currentUserId);
 
             while (friends.next()) {
@@ -253,6 +260,16 @@ public class TripDetailsServlet extends HttpServlet {
             response.sendRedirect("trips");
             return;
         }
+
+        int currentUserId = (int) session.getAttribute("userId");
+        TripMemberDAO accessDAO = new TripMemberDAO();
+
+        if (!accessDAO.isMember(tripId, currentUserId)) {
+            session.removeAttribute("currentTripId");
+            response.sendRedirect("trips");
+            return;
+        }
+
         String action = request.getParameter("action");
 
         if ("addNote".equals(action)) {

@@ -19,10 +19,16 @@ public class RespondFriendRequestServlet extends HttpServlet {
             return;
         }
 
+        int currentUserId = (int) session.getAttribute("userId");
         int requestId = Integer.parseInt(request.getParameter("id"));
         String action = request.getParameter("action");
 
         FriendDAO dao = new FriendDAO();
+
+        if (!dao.isRequestForReceiver(requestId, currentUserId)) {
+            response.sendRedirect("friend-requests");
+            return;
+        }
 
         if ("accept".equals(action)) {
             dao.acceptRequest(requestId);

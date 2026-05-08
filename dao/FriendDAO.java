@@ -73,7 +73,6 @@ public class FriendDAO {
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, requestId);
             ps.executeUpdate();
 
@@ -88,5 +87,32 @@ public class FriendDAO {
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setInt(1, userId);
         return ps.executeQuery();
+    }
+
+    public boolean areFriends(int userId, int friendId) {
+        String sql = "SELECT 1 FROM friends WHERE user_id = ? AND friend_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, friendId);
+            ResultSet rs = ps.executeQuery();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean isRequestForReceiver(int requestId, int receiverId) {
+        String sql = "SELECT 1 FROM friend_requests WHERE id = ? AND receiver_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, requestId);
+            ps.setInt(2, receiverId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
