@@ -22,14 +22,13 @@ public class TripServlet extends HttpServlet {
 
         int userId = (int) session.getAttribute("userId");
         String username = (String) session.getAttribute("username");
-
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
-
         out.println("<html><body>");
         out.println("<br><a href='friends'>Friends</a>");
         out.println("<h2>Your Trips</h2>");
         out.println("<p>Logged in as: " + username + "</p>");
+        out.println("<p>User ID: " + userId + "</p>");
         out.println("<p>Session ID: " + session.getId() + "</p>");
 
         out.println("<h3>Create new trip</h3>");
