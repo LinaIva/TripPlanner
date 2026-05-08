@@ -30,9 +30,26 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("username", username);
             session.setAttribute("role", "user");
 
-            Cookie lastUserCookie = new Cookie("lastUsername", username);
-            lastUserCookie.setMaxAge(60 * 60 * 24 * 7);
-            response.addCookie(lastUserCookie);
+            boolean updatedCookie = false;
+            Cookie[] cookies = request.getCookies();
+
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("lastUsername".equals(cookie.getName())) {
+                        cookie.setValue(username);
+                        cookie.setMaxAge(60 * 60 * 24 * 7);
+                        response.addCookie(cookie);
+                        updatedCookie = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!updatedCookie) {
+                Cookie lastUserCookie = new Cookie("lastUsername", username);
+                lastUserCookie.setMaxAge(60 * 60 * 24 * 7);
+                response.addCookie(lastUserCookie);
+            }
 
             out.println("<h2>Login successful</h2>");
             out.println("<p>Welcome, " + username + "</p>");
