@@ -7,10 +7,12 @@ public class FriendDAO {
 
     public ResultSet findUsers(String username, int currentUserId) throws Exception {
         Connection conn = DBConnection.getConnection();
-        String sql = "SELECT id, username FROM users WHERE username ILIKE ? AND id <> ?";
+        String sql = "SELECT id, username FROM users u WHERE u.username ILIKE ? AND u.id <> ? " +
+                "AND NOT EXISTS (SELECT 1 FROM friends f WHERE f.user_id = ? AND f.friend_id = u.id)";
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setString(1, "%" + username + "%");
         ps.setInt(2, currentUserId);
+        ps.setInt(3, currentUserId);
         return ps.executeQuery();
     }
 
@@ -96,6 +98,23 @@ public class FriendDAO {
         try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             ps.setInt(2, receiverId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean hasWaitingRequestBetween(int senderId, int receiverId) {
+        String sql = "SELECT 1 FROM friend_requests " +
+                "WHERE ((sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)) " +
+                "AND status = 'WAITING'";
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, senderId);
+            ps.setInt(2, receiverId);
+            ps.setInt(3, receiverId);
+            ps.setInt(4, senderId);
             ResultSet rs = ps.executeQuery();
             return rs.next();
         } catch (Exception e) {

@@ -18,11 +18,19 @@ public class SendFriendRequestServlet extends HttpServlet {
         int senderId = (int) session.getAttribute("userId");
         int receiverId = Integer.parseInt(request.getParameter("receiverId"));
         FriendDAO dao = new FriendDAO();
-        dao.sendRequest(senderId, receiverId);
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
         out.println("<html><body>");
-        out.println("<h2>Friend request sent</h2>");
+        if (senderId == receiverId) {
+            out.println("<h2>You cannot add yourself</h2>");
+        } else if (dao.areFriends(senderId, receiverId)) {
+            out.println("<h2>This user is already your friend</h2>");
+        } else if (dao.hasWaitingRequestBetween(senderId, receiverId)) {
+            out.println("<h2>A friend request already exists</h2>");
+        } else {
+            dao.sendRequest(senderId, receiverId);
+            out.println("<h2>Friend request sent</h2>");
+        }
         out.println("<a href='friends'>Back to friends</a>");
         out.println("</body></html>");
     }
