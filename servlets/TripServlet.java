@@ -34,9 +34,11 @@ public class TripServlet extends HttpServlet {
         try {
             TripDAO tripDAO = new TripDAO();
             ResultSet rs = tripDAO.getTripsByUser(userId);
-            out.println("<table border='1'>");
-            out.println("<tr><th>ID</th><th>Title</th><th>Destination</th><th>Start</th><th>End</th><th>Action</th></tr>");
             while (rs.next()) {
+                if (rs.isFirst()) {
+                    out.println("<table border='1'>");
+                    out.println("<tr><th>ID</th><th>Title</th><th>Destination</th><th>Start</th><th>End</th><th>Action</th></tr>");
+                }
                 out.println("<tr>");
                 out.println("<td>" + rs.getInt("id") + "</td>");
                 out.println("<td>" + rs.getString("title") + "</td>");
@@ -46,12 +48,13 @@ public class TripServlet extends HttpServlet {
                 out.println("<td><a href='trip-details?tripId=" + rs.getInt("id") + "'>Open</a></td>");
                 out.println("</tr>");
             }
-            out.println("</table>");
+            if (rs.isBeforeFirst()) out.println("<p>You don't have any trips yet. Create your first one above.</p>");
+            else out.println("</table>");
         } catch (Exception e) {
-            out.println("<p>Error loading trips</p>");
+            out.println("<p>Couldn't load your trips right now.</p>");
             e.printStackTrace();
         }
-        out.println("<br><a href='logout'>Logout</a>");
+        out.println("<br><a href='logout'>Log out</a>");
         PageRenderer.renderPageEnd(out);
     }
 

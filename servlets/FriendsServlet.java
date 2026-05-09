@@ -30,17 +30,18 @@ public class FriendsServlet extends HttpServlet {
         try {
             FriendDAO dao = new FriendDAO();
             ResultSet friends = dao.getFriends(userId);
-            out.println("<ul>");
             while (friends.next()) {
+                if (friends.isFirst()) out.println("<ul>");
                 out.println("<li>" + friends.getString("username") + "</li>");
             }
-            out.println("</ul>");
+            if (friends.isBeforeFirst()) out.println("<p>No friends yet. Search for someone above to get started.</p>");
+            else out.println("</ul>");
         } catch (Exception e) {
-            out.println("<p>Error loading friends</p>");
+            out.println("<p>Couldn't load your friends right now.</p>");
             e.printStackTrace();
         }
         out.println("<br><a href='friend-requests'>Friend requests</a>");
-        out.println("<br><a href='trips'>Back to trips</a>");
+        out.println("<br><a href='trips'>Back to my trips</a>");
         PageRenderer.renderPageEnd(out);
     }
 
@@ -59,16 +60,19 @@ public class FriendsServlet extends HttpServlet {
         try {
             FriendDAO dao = new FriendDAO();
             ResultSet rs = dao.findUsers(search, userId);
+            boolean found = false;
             while (rs.next()) {
+                found = true;
                 int foundUserId = rs.getInt("id");
                 String username = rs.getString("username");
                 out.println("<p>" + username + " <a href='send-friend-request?receiverId=" + foundUserId + "'>Add friend</a></p>");
             }
+            if (!found) out.println("<p>No matching users found. Try another username.</p>");
         } catch (Exception e) {
-            out.println("<p>Error searching users</p>");
+            out.println("<p>Couldn't search for users right now.</p>");
             e.printStackTrace();
         }
-        out.println("<br><a href='friends'>Back</a>");
+        out.println("<br><a href='friends'>Back to friends</a>");
         PageRenderer.renderPageEnd(out);
     }
 }

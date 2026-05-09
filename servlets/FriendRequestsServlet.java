@@ -25,14 +25,17 @@ public class FriendRequestsServlet extends HttpServlet {
         try {
             FriendDAO dao = new FriendDAO();
             ResultSet rs = dao.getWaitingRequests(userId);
+            boolean hasRequests = false;
             while (rs.next()) {
+                hasRequests = true;
                 int requestId = rs.getInt("id");
                 String username = rs.getString("username");
                 out.println("<p>" + username + " <a href='respond-friend-request?action=accept&id=" + requestId + "'>Accept</a>" +
                         " <a href='respond-friend-request?action=decline&id=" + requestId + "'>Decline</a></p>");
             }
+            if (!hasRequests) out.println("<p>No new friend requests right now.</p>");
         } catch (Exception e) {
-            out.println("<p>Error loading requests</p>");
+            out.println("<p>Couldn't load friend requests right now.</p>");
             e.printStackTrace();
         }
         out.println("<br><a href='friends'>Back to friends</a>");

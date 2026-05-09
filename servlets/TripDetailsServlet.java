@@ -76,7 +76,7 @@ public class TripDetailsServlet extends HttpServlet {
             }
             out.println("</ul>");
         } catch (Exception e) {
-            out.println("<p>Error loading trip members</p>");
+            out.println("<p>Couldn't load trip members right now.</p>");
             e.printStackTrace();
         }
         out.println("<div class='action-dropdown'><details><summary>Add friend</summary><div class='action-panel'>");
@@ -93,9 +93,9 @@ public class TripDetailsServlet extends HttpServlet {
                         "<a class='inline-link' href='add-trip-member?tripId=" + tripId +
                         "&friendId=" + friendId + "'>Add to trip</a></div>");
             }
-            if (!hasFriendOption) out.println("<p>No friends available to add.</p>");
+            if (!hasFriendOption) out.println("<p>All your friends are already in this trip.</p>");
         } catch (Exception e) {
-            out.println("<p>Error loading friends</p>");
+            out.println("<p>Couldn't load your friends right now.</p>");
             e.printStackTrace();
         }
         out.println("</div></details></div>");
@@ -115,7 +115,7 @@ public class TripDetailsServlet extends HttpServlet {
             }
             out.println("</ul>");
         } catch (Throwable e) {
-            out.println("<p style='color:red;'>JPA notes error: " + e.getMessage() + "</p>");
+            out.println("<p style='color:red;'>Couldn't load trip notes right now.</p>");
             e.printStackTrace();
         }
         out.println("<h3>Planned activities</h3>");
@@ -123,9 +123,13 @@ public class TripDetailsServlet extends HttpServlet {
         try {
             ActivityDAO dao = new ActivityDAO();
             ResultSet rs = dao.getActivitiesByTrip(tripId);
-            out.println("<table border='1'>");
-            out.println("<tr><th>Date</th><th>Type</th><th>Title</th><th>Description</th><th>Price</th><th></th></tr>");
+            boolean hasActivities = false;
             while (rs.next()) {
+                if (!hasActivities) {
+                    hasActivities = true;
+                    out.println("<table border='1'>");
+                    out.println("<tr><th>Date</th><th>Type</th><th>Title</th><th>Description</th><th>Price</th><th></th></tr>");
+                }
                 double price = rs.getDouble("price");
                 total += price;
                 out.println("<tr>");
@@ -140,10 +144,11 @@ public class TripDetailsServlet extends HttpServlet {
                         "<input type='submit' value='Delete'></form></td>");
                 out.println("</tr>");
             }
-            out.println("</table>");
+            if (hasActivities) out.println("</table>");
+            else out.println("<p>No trip plans yet. Add the first one below.</p>");
             out.println("<br><h3>Total price: " + total + "</h3>");
         } catch (Exception e) {
-            out.println("<p>Error loading activities</p>");
+            out.println("<p>Couldn't load trip plans right now.</p>");
             e.printStackTrace();
         }
         out.println("<div class='action-dropdown'><details><summary>Add plan</summary><div class='action-panel'>");
@@ -162,8 +167,8 @@ public class TripDetailsServlet extends HttpServlet {
         out.println("<input type='submit' value='Add Activity'>");
         out.println("</form>");
         out.println("</div></details></div>");
-        out.println("<br><a href='trips'>Back to trips</a>");
-        out.println("<br><a href='logout'>Logout</a>");
+        out.println("<br><a href='trips'>Back to my trips</a>");
+        out.println("<br><a href='logout'>Log out</a>");
         String username = (String) session.getAttribute("username");
         out.println("<style>");
         out.println("#chatBox { position: fixed; right: 20px; bottom: 70px; width: 300px; height: 350px; border: 1px solid black; background: white; display: none; padding: 10px; }");
@@ -190,7 +195,7 @@ public class TripDetailsServlet extends HttpServlet {
                 out.println("<p>" + oldMessages.get(i) + "</p>");
             }
         } catch (Exception e) {
-            out.println("<p>Error loading chat history</p>");
+            out.println("<p>Couldn't load chat history right now.</p>");
             e.printStackTrace();
         }
         out.println("</div>");
@@ -275,8 +280,8 @@ public class TripDetailsServlet extends HttpServlet {
             response.setContentType("text/html");
             PrintWriter out = response.getWriter();
             PageRenderer.renderPageStart(out, session, "Invalid activity date", "trips");
-            out.println("<h2>Invalid activity date</h2>");
-            out.println("<p>The plan date must be inside the trip date range.</p>");
+            out.println("<h2>That date doesn't fit this trip</h2>");
+            out.println("<p>Please choose a plan date that is inside the trip date range.</p>");
             out.println("<p><a href='trip-details?tripId=" + tripId + "'>Back to trip</a></p>");
             PageRenderer.renderPageEnd(out);
             return;
