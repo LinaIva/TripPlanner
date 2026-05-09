@@ -21,8 +21,13 @@ public class FriendsServlet extends HttpServlet {
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
         PageRenderer.renderPageStart(out, session, "Friends", "friends");
+        out.println("<style>");
+        out.println(".friend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }");
+        out.println(".friend-row form { margin: 0; }");
+        out.println("</style>");
         out.println("<h2>Friends</h2>");
         out.println("<form action='friends' method='post'>");
+        out.println("<input type='hidden' name='action' value='search'>");
         out.println("Search username: <input type='text' name='search'>");
         out.println("<input type='submit' value='Search'>");
         out.println("</form>");
@@ -30,11 +35,19 @@ public class FriendsServlet extends HttpServlet {
         try {
             FriendDAO dao = new FriendDAO();
             ResultSet friends = dao.getFriends(userId);
+            boolean hasFriends = false;
             while (friends.next()) {
-                if (friends.isFirst()) out.println("<ul>");
-                out.println("<li>" + friends.getString("username") + "</li>");
+                if (!hasFriends) {
+                    hasFriends = true;
+                    out.println("<ul>");
+                }
+                out.println("<li><div class='friend-row'><span>" + friends.getString("username") + "</span>" +
+                        "<form action='friends' method='post'>" +
+                        "<input type='hidden' name='action' value='removeFriend'>" +
+                        "<input type='hidden' name='friendId' value='" + friends.getInt("id") + "'>" +
+                        "<input type='submit' value='Remove'></form></div></li>");
             }
-            if (friends.isBeforeFirst()) out.println("<p>No friends yet. Search for someone above to get started.</p>");
+            if (!hasFriends) out.println("<p>No friends yet.</p>");
             else out.println("</ul>");
         } catch (Exception e) {
             out.println("<p>Couldn't load your friends right now.</p>");
@@ -52,6 +65,18 @@ public class FriendsServlet extends HttpServlet {
             return;
         }
         int userId = (int) session.getAttribute("userId");
+        String action = request.getParameter("action");
+        if ("removeFriend".equals(action)) {
+            try {
+                int friendId = Integer.parseInt(request.getParameter("friendId"));
+                FriendDAO dao = new FriendDAO();
+                if (dao.areFriends(userId, friendId)) dao.removeFriend(userId, friendId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            response.sendRedirect("friends");
+            return;
+        }
         String search = request.getParameter("search");
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();

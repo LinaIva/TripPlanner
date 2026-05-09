@@ -61,8 +61,10 @@ public class TripDetailsServlet extends HttpServlet {
         out.println(".inline-link { white-space: nowrap; }");
         out.println(".delete-form { margin: 0; }");
         out.println(".delete-form input { margin: 0; }");
+        out.println(".note-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }");
+        out.println(".trip-title-row { display: flex; align-items: center; gap: 10px; }");
         out.println("</style>");
-        out.println("<h2>" + tripTitle + "</h2>");
+        out.println("<div class='trip-title-row'><h2 style='margin:0;'>" + tripTitle + "</h2><button id='chatButton' onclick='toggleChat()'>Chat <span id='newDot'>●</span></button></div>");
         out.println("<p>" + tripDateRange + "</p>");
 //        out.println("<p>Trip ID: " + tripId + "</p>");
         out.println("<p><a href='leave-trip?tripId=" + tripId + "'>Leave this trip</a></p>");
@@ -109,11 +111,16 @@ public class TripDetailsServlet extends HttpServlet {
             out.println("Note: <input type='text' name='noteText' required>");
             out.println("<input type='submit' value='Add Note'>");
             out.println("</form>");
-            out.println("<ul class='notes-list'>");
+            if (notes.isEmpty()) out.println("<p>No notes yet. Add the first one above.</p>");
+            else out.println("<ul class='notes-list'>");
             for (TripNoteEntity note : notes) {
-                out.println("<li>" + note.getNoteText() + "</li>");
+                out.println("<li><div class='note-row'><span>" + note.getNoteText() + "</span>" +
+                        "<form class='delete-form' action='trip-details' method='post'>" +
+                        "<input type='hidden' name='action' value='deleteNote'>" +
+                        "<input type='hidden' name='noteId' value='" + note.getId() + "'>" +
+                        "<input type='submit' value='Delete'></form></div></li>");
             }
-            out.println("</ul>");
+            if (!notes.isEmpty()) out.println("</ul>");
         } catch (Throwable e) {
             out.println("<p style='color:red;'>Couldn't load trip notes right now.</p>");
             e.printStackTrace();
@@ -171,13 +178,10 @@ public class TripDetailsServlet extends HttpServlet {
         out.println("<br><a href='logout'>Log out</a>");
         String username = (String) session.getAttribute("username");
         out.println("<style>");
-        out.println("#chatBox { position: fixed; right: 20px; bottom: 70px; width: 300px; height: 350px; border: 1px solid black; background: white; display: none; padding: 10px; }");
+        out.println("#chatBox { position: fixed; right: 20px; top: 120px; width: 300px; height: 350px; border: 1px solid black; background: white; display: none; padding: 10px; }");
         out.println("#messages { height: 240px; overflow-y: scroll; border: 1px solid gray; margin-bottom: 10px; padding: 5px; }");
-        out.println("#chatButton { position: fixed; right: 20px; bottom: 20px; }");
         out.println("#newDot { color: red; display: none; font-size: 20px; }");
         out.println("</style>");
-
-        out.println("<button id='chatButton' onclick='toggleChat()'>Chat <span id='newDot'>●</span></button>");
         out.println("<div id='chatBox'>");
         out.println("<button onclick='toggleChat()'>X</button>");
         out.println("<h3>Trip Chat</h3>");
@@ -257,6 +261,17 @@ public class TripDetailsServlet extends HttpServlet {
             String noteText = request.getParameter("noteText");
             TripNoteService noteService = new TripNoteService();
             noteService.addNote(tripId, noteText);
+            response.sendRedirect("trip-details");
+            return;
+        }
+        if ("deleteNote".equals(action)) {
+            try {
+                int noteId = Integer.parseInt(request.getParameter("noteId"));
+                TripNoteService noteService = new TripNoteService();
+                noteService.deleteNote(noteId, tripId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             response.sendRedirect("trip-details");
             return;
         }

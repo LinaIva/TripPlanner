@@ -32,4 +32,16 @@ public class TripNoteService {
             em.close();
         }
     }
+
+    public void deleteNote(int noteId, int tripId) {
+        EntityManager em = JPAUtil.getEntityManagerFactory().createEntityManager();
+        try {
+            em.getTransaction().begin();
+            TripNoteEntity note = em.find(TripNoteEntity.class, noteId);
+            if (note != null && note.getTripId() == tripId) em.remove(note);
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
+    }
 }

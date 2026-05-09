@@ -74,10 +74,23 @@ public class FriendDAO {
 
     public ResultSet getFriends(int userId) throws Exception {
         Connection conn = DBConnection.getConnection();
-        String sql = "SELECT u.username FROM friends f JOIN users u ON f.friend_id = u.id WHERE f.user_id = ?";
+        String sql = "SELECT u.id, u.username FROM friends f JOIN users u ON f.friend_id = u.id WHERE f.user_id = ?";
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setInt(1, userId);
         return ps.executeQuery();
+    }
+
+    public void removeFriend(int userId, int friendId) {
+        String sql = "DELETE FROM friends WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)";
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, friendId);
+            ps.setInt(3, friendId);
+            ps.setInt(4, userId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean areFriends(int userId, int friendId) {
