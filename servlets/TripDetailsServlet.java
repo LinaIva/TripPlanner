@@ -16,73 +16,56 @@ import java.util.List;
 @WebServlet("/trip-details")
 public class TripDetailsServlet extends HttpServlet {
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-
         if (session == null || session.getAttribute("username") == null) {
             response.sendRedirect("index.html");
             return;
         }
-
         String tripIdParam = request.getParameter("tripId");
-
         if (tripIdParam != null) {
             session.setAttribute("currentTripId", Integer.parseInt(tripIdParam));
         }
-
         Integer tripId = (Integer) session.getAttribute("currentTripId");
-
         if (tripId == null) {
             response.sendRedirect("trips");
             return;
         }
-
         int currentUserId = (int) session.getAttribute("userId");
         TripMemberDAO accessDAO = new TripMemberDAO();
-
         if (!accessDAO.isMember(tripId, currentUserId)) {
             session.removeAttribute("currentTripId");
             response.sendRedirect("trips");
             return;
         }
-
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
         TripDAO tripDAO = new TripDAO();
         String tripTitle = tripDAO.getTripTitle(tripId);
-
         out.println("<html><body>");
         out.println("<h2>" + tripTitle + "</h2>");
         out.println("<p>Trip ID: " + tripId + "</p>");
         out.println("<p><a href='leave-trip?tripId=" + tripId + "'>Leave this trip</a></p>");
         out.println("<h3>Trip members</h3>");
-
         try {
             TripMemberDAO memberDAO = new TripMemberDAO();
             ResultSet members = memberDAO.getTripMembers(tripId);
-
             out.println("<ul>");
             while (members.next()) {
                 out.println("<li>" + members.getString("username") + "</li>");
             }
             out.println("</ul>");
-
         } catch (Exception e) {
             out.println("<p>Error loading trip members</p>");
             e.printStackTrace();
         }
         out.println("<h3>Add friend to this trip</h3>");
-
         try {
             TripMemberDAO memberDAO = new TripMemberDAO();
             ResultSet friends = memberDAO.getUserFriends(currentUserId);
-
             while (friends.next()) {
                 int friendId = friends.getInt("id");
                 String friendName = friends.getString("username");
-
                 if (memberDAO.isMember(tripId, friendId)) {
                     out.println("<p>" + friendName + "  Already added</p>");
                 } else {
@@ -91,7 +74,6 @@ public class TripDetailsServlet extends HttpServlet {
                             "&friendId=" + friendId + "'>Add to trip</a></p>");
                 }
             }
-
         } catch (Exception e) {
             out.println("<p>Error loading friends</p>");
             e.printStackTrace();
@@ -116,39 +98,30 @@ public class TripDetailsServlet extends HttpServlet {
         try {
             TripNoteService noteService = new TripNoteService();
             List<TripNoteEntity> notes = noteService.getNotesByTrip(tripId);
-
             out.println("<form action='trip-details' method='post'>");
             out.println("<input type='hidden' name='action' value='addNote'>");
             out.println("Note: <input type='text' name='noteText' required>");
             out.println("<input type='submit' value='Add Note'>");
             out.println("</form>");
-
             out.println("<ul>");
             for (TripNoteEntity note : notes) {
                 out.println("<li>" + note.getNoteText() + " <small>(" + note.getCreatedAt() + ")</small></li>");
             }
             out.println("</ul>");
-
         } catch (Throwable e) {
             out.println("<p style='color:red;'>JPA notes error: " + e.getMessage() + "</p>");
             e.printStackTrace();
         }
-
         out.println("<h3>Planned activities</h3>");
-
         double total = 0;
-
         try {
             ActivityDAO dao = new ActivityDAO();
             ResultSet rs = dao.getActivitiesByTrip(tripId);
-
             out.println("<table border='1'>");
             out.println("<tr><th>Date</th><th>Type</th><th>Title</th><th>Description</th><th>Price</th></tr>");
-
             while (rs.next()) {
                 double price = rs.getDouble("price");
                 total += price;
-
                 out.println("<tr>");
                 out.println("<td>" + rs.getDate("activity_date") + "</td>");
                 out.println("<td>" + rs.getString("type") + "</td>");
@@ -157,19 +130,15 @@ public class TripDetailsServlet extends HttpServlet {
                 out.println("<td>" + price + "</td>");
                 out.println("</tr>");
             }
-
             out.println("</table>");
             out.println("<h3>Total price: " + total + "</h3>");
-
         } catch (Exception e) {
             out.println("<p>Error loading activities</p>");
             e.printStackTrace();
         }
         out.println("<br><a href='trips'>Back to trips</a>");
         out.println("<br><a href='logout'>Logout</a>");
-
         String username = (String) session.getAttribute("username");
-
         out.println("<style>");
         out.println("#chatBox { position: fixed; right: 20px; bottom: 70px; width: 300px; height: 350px; border: 1px solid black; background: white; display: none; padding: 10px; }");
         out.println("#messages { height: 240px; overflow-y: scroll; border: 1px solid gray; margin-bottom: 10px; padding: 5px; }");
@@ -178,40 +147,30 @@ public class TripDetailsServlet extends HttpServlet {
         out.println("</style>");
 
         out.println("<button id='chatButton' onclick='toggleChat()'>Chat <span id='newDot'>●</span></button>");
-
         out.println("<div id='chatBox'>");
         out.println("<button onclick='toggleChat()'>X</button>");
         out.println("<h3>Trip Chat</h3>");
-
         out.println("<div id='messages'>");
-
         try {
             ChatMessageDAO chatDAO = new ChatMessageDAO();
             ResultSet chatRs = chatDAO.getLastMessages(tripId);
-
             java.util.ArrayList<String> oldMessages = new java.util.ArrayList<>();
-
             while (chatRs.next()) {
                 String user = chatRs.getString("username");
                 String msg = chatRs.getString("message");
                 oldMessages.add(user + ": " + msg);
             }
-
             for (int i = oldMessages.size() - 1; i >= 0; i--) {
                 out.println("<p>" + oldMessages.get(i) + "</p>");
             }
-
         } catch (Exception e) {
             out.println("<p>Error loading chat history</p>");
             e.printStackTrace();
         }
-
         out.println("</div>");
-
         out.println("<input type='text' id='chatInput' placeholder='Message'>");
         out.println("<button onclick='sendMessage()'>Send</button>");
         out.println("</div>");
-
         out.println("<script>");
         out.println("let chatOpen = false;");
         out.println("let username = '" + username + "';");
@@ -244,40 +203,29 @@ public class TripDetailsServlet extends HttpServlet {
         out.println("</body></html>");
     }
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-
         if (session == null || session.getAttribute("username") == null) {
             response.sendRedirect("index.html");
             return;
         }
-
         Integer tripId = (Integer) session.getAttribute("currentTripId");
-
         if (tripId == null) {
             response.sendRedirect("trips");
             return;
         }
-
         int currentUserId = (int) session.getAttribute("userId");
         TripMemberDAO accessDAO = new TripMemberDAO();
-
         if (!accessDAO.isMember(tripId, currentUserId)) {
             session.removeAttribute("currentTripId");
             response.sendRedirect("trips");
             return;
         }
-
         String action = request.getParameter("action");
-
         if ("addNote".equals(action)) {
             String noteText = request.getParameter("noteText");
-
             TripNoteService noteService = new TripNoteService();
             noteService.addNote(tripId, noteText);
-
             response.sendRedirect("trip-details");
             return;
         }
@@ -285,18 +233,14 @@ public class TripDetailsServlet extends HttpServlet {
         String type = request.getParameter("type");
         String title = request.getParameter("title");
         String description = request.getParameter("description");
-
         double price = 0;
-
         try {
             price = Double.parseDouble(request.getParameter("price"));
         } catch (Exception e) {
             price = 0;
         }
-
         ActivityDAO dao = new ActivityDAO();
         dao.addActivity(tripId, activityDate, type, title, description, price);
-
         response.sendRedirect("trip-details");
     }
 }

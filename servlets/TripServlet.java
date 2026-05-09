@@ -10,16 +10,12 @@ import java.sql.ResultSet;
 @WebServlet("/trips")
 public class TripServlet extends HttpServlet {
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-
         if (session == null || session.getAttribute("username") == null) {
             response.sendRedirect("index.html");
             return;
         }
-
         int userId = (int) session.getAttribute("userId");
         String username = (String) session.getAttribute("username");
         response.setContentType("text/html");
@@ -39,13 +35,10 @@ public class TripServlet extends HttpServlet {
         out.println("End date: <input type='date' name='endDate' required><br>");
         out.println("<input type='submit' value='Create Trip'>");
         out.println("</form>");
-
         out.println("<h3>Saved trips</h3>");
-
         try {
             TripDAO tripDAO = new TripDAO();
             ResultSet rs = tripDAO.getTripsByUser(userId);
-
             out.println("<table border='1'>");
             out.println("<tr><th>ID</th><th>Title</th><th>Destination</th><th>Start</th><th>End</th><th>Action</th></tr>");
             while (rs.next()) {
@@ -58,38 +51,28 @@ public class TripServlet extends HttpServlet {
                 out.println("<td><a href='trip-details?tripId=" + rs.getInt("id") + "'>Open</a></td>");
                 out.println("</tr>");
             }
-
             out.println("</table>");
-
         } catch (Exception e) {
             out.println("<p>Error loading trips</p>");
             e.printStackTrace();
         }
-
         out.println("<br><a href='logout'>Logout</a>");
         out.println("</body></html>");
     }
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-
         if (session == null || session.getAttribute("username") == null) {
             response.sendRedirect("index.html");
             return;
         }
-
         int userId = (int) session.getAttribute("userId");
-
         String title = request.getParameter("title");
         String destination = request.getParameter("destination");
         String startDate = request.getParameter("startDate");
         String endDate = request.getParameter("endDate");
-
         TripDAO tripDAO = new TripDAO();
         tripDAO.addTrip(title, destination, startDate, endDate, userId);
-
         response.sendRedirect("trips");
     }
 }

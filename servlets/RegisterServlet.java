@@ -9,19 +9,14 @@ import java.io.*;
 @WebServlet("/register")
 public class RegisterServlet extends HttpServlet {
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-
         if (session != null && session.getAttribute("username") != null) {
             response.sendRedirect("trips");
             return;
         }
-
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
-
         out.println("<html><body>");
         out.println("<h2>Register</h2>");
         out.println("<form action='register' method='post'>");
@@ -33,20 +28,14 @@ public class RegisterServlet extends HttpServlet {
         out.println("</body></html>");
     }
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-
         UserDAO userDAO = new UserDAO();
         boolean success = userDAO.registerUser(username, password);
-
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
-
         out.println("<html><body>");
-
         if (success) {
             out.println("<h2>Registration successful</h2>");
             out.println("<a href='login'>Go to login</a>");
@@ -55,7 +44,6 @@ public class RegisterServlet extends HttpServlet {
             out.println("<p>Username may already exist.</p>");
             out.println("<a href='register'>Try again</a>");
         }
-
         out.println("</body></html>");
     }
 }

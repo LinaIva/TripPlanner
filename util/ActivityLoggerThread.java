@@ -6,21 +6,16 @@ public class ActivityLoggerThread extends Thread {
 
     @Override
     public void run() {
-
         while (running) {
             try {
-                Thread.sleep(5000);
-
+                Thread.sleep(10000);
                 System.out.println("========== System Status ==========");
                 System.out.println("Time: " + new java.util.Date());
                 System.out.println("Active users: " + UserTracker.getActiveUserCount());
-
                 for (String user : UserTracker.getActiveUsers()) {
                     System.out.println(" - " + user);
                 }
-
                 System.out.println("===================================");
-
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

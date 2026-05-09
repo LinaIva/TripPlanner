@@ -16,14 +16,11 @@ public class FriendDAO {
 
     public void sendRequest(int senderId, int receiverId) {
         String sql = "INSERT INTO friend_requests (sender_id, receiver_id, status) VALUES (?, ?, 'WAITING')";
-
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, senderId);
             ps.setInt(2, receiverId);
             ps.executeUpdate();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -41,20 +38,16 @@ public class FriendDAO {
         String selectSql = "SELECT sender_id, receiver_id FROM friend_requests WHERE id = ?";
         String updateSql = "UPDATE friend_requests SET status = 'ACCEPTED' WHERE id = ?";
         String insertSql = "INSERT INTO friends (user_id, friend_id) VALUES (?, ?), (?, ?)";
-
         try (Connection conn = DBConnection.getConnection()) {
             PreparedStatement select = conn.prepareStatement(selectSql);
             select.setInt(1, requestId);
             ResultSet rs = select.executeQuery();
-
             if (rs.next()) {
                 int senderId = rs.getInt("sender_id");
                 int receiverId = rs.getInt("receiver_id");
-
                 PreparedStatement update = conn.prepareStatement(updateSql);
                 update.setInt(1, requestId);
                 update.executeUpdate();
-
                 PreparedStatement insert = conn.prepareStatement(insertSql);
                 insert.setInt(1, senderId);
                 insert.setInt(2, receiverId);
@@ -62,7 +55,6 @@ public class FriendDAO {
                 insert.setInt(4, senderId);
                 insert.executeUpdate();
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -70,12 +62,9 @@ public class FriendDAO {
 
     public void declineRequest(int requestId) {
         String sql = "UPDATE friend_requests SET status = 'DECLINED' WHERE id = ?";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             ps.executeUpdate();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -91,8 +80,7 @@ public class FriendDAO {
 
     public boolean areFriends(int userId, int friendId) {
         String sql = "SELECT 1 FROM friends WHERE user_id = ? AND friend_id = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ps.setInt(2, friendId);
             ResultSet rs = ps.executeQuery();
@@ -105,8 +93,7 @@ public class FriendDAO {
 
     public boolean isRequestForReceiver(int requestId, int receiverId) {
         String sql = "SELECT 1 FROM friend_requests WHERE id = ? AND receiver_id = ?";
-        try (Connection conn = DBConnection.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, requestId);
             ps.setInt(2, receiverId);
             ResultSet rs = ps.executeQuery();
