@@ -111,7 +111,7 @@ public class TripDetailsServlet extends HttpServlet {
         out.println("Price: <input type='number' step='0.01' name='price' value='0'><br>");
         out.println("<input type='submit' value='Add Activity'>");
         out.println("</form>");
-        out.println("<h3>Trip Notes (JPA)</h3>");
+        out.println("<h3>Trip Notes</h3>");
 
         try {
             TripNoteService noteService = new TripNoteService();

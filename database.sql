@@ -77,7 +77,7 @@ FOREIGN KEY (trip_id) REFERENCES trips(id)
 INSERT INTO users (username, password) VALUES ('admin', 'admin123'),
         ('fred', 'fred'),
        ('alex', 'alex'),
-        ('miu', 'miu');
+        ('lisa', 'lisa');
 
 INSERT INTO trips (title, destination, start_date, end_date, user_id)
 VALUES ('Spring Seoul Trip', 'Seoul', '2026-04-10', '2026-04-20', 1),
