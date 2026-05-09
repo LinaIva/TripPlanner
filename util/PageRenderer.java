@@ -28,6 +28,10 @@ public final class PageRenderer {
         out.println(".nav-links { display: flex; align-items: center; gap: 12px; }");
         out.println(".nav-link { display: inline-block; padding: 8px 14px; border: 1px solid black; text-decoration: none; color: inherit; }");
         out.println(".nav-link.active { font-weight: bold; }");
+        out.println(".ui-button { display: inline-block; padding: 2px 6px; border: 1px solid rgb(118,118,118); background: rgb(239,239,239); color: black; text-decoration: none; font: inherit; font-size: 13px; line-height: normal; cursor: pointer; }");
+        out.println(".ui-button.danger { padding: 2px 6px; }");
+        out.println(".ui-button.small { padding: 2px 6px; }");
+        out.println("input[type='submit'], button { padding: 2px 6px; border: 1px solid rgb(118,118,118); background: rgb(239,239,239); color: black; font: inherit; font-size: 13px; line-height: normal; cursor: pointer; }");
         out.println("h2, h3 { margin-top: 0; }");
         out.println("table { border-collapse: collapse; }");
         out.println("th, td { padding: 8px 10px; }");

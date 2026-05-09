@@ -49,7 +49,7 @@ public class TripDetailsServlet extends HttpServlet {
         out.println(".section-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin: 24px 0 12px; }");
         out.println(".section-header h3 { margin: 0; }");
         out.println(".action-dropdown details { display: inline-block; }");
-        out.println(".action-dropdown summary { cursor: pointer; list-style: none; border: 1px solid black; padding: 8px 14px; }");
+        out.println(".action-dropdown summary { cursor: pointer; list-style: none; }");
         out.println(".action-dropdown summary::-webkit-details-marker { display: none; }");
         out.println(".action-panel { margin-top: 8px; padding: 12px; border: 1px solid black; min-width: 320px; }");
         out.println(".action-panel p { margin: 0 0 8px; }");
@@ -81,7 +81,7 @@ public class TripDetailsServlet extends HttpServlet {
             out.println("<p>Couldn't load trip members right now.</p>");
             e.printStackTrace();
         }
-        out.println("<div class='action-dropdown'><details><summary>Add friend</summary><div class='action-panel'>");
+        out.println("<div class='action-dropdown'><details><summary class='ui-button'>Add friend</summary><div class='action-panel'>");
         try {
             TripMemberDAO memberDAO = new TripMemberDAO();
             ResultSet friends = memberDAO.getUserFriends(currentUserId);
@@ -92,7 +92,7 @@ public class TripDetailsServlet extends HttpServlet {
                 if (memberDAO.isMember(tripId, friendId)) continue;
                 hasFriendOption = true;
                 out.println("<div class='friend-option'><span>" + friendName + "</span>" +
-                        "<a class='inline-link' href='add-trip-member?tripId=" + tripId +
+                        "<a class='ui-button small inline-link' href='add-trip-member?tripId=" + tripId +
                         "&friendId=" + friendId + "'>Add to trip</a></div>");
             }
             if (!hasFriendOption) out.println("<p>All your friends are already in this trip.</p>");
@@ -158,7 +158,7 @@ public class TripDetailsServlet extends HttpServlet {
             out.println("<p>Couldn't load trip plans right now.</p>");
             e.printStackTrace();
         }
-        out.println("<div class='action-dropdown'><details><summary>Add plan</summary><div class='action-panel'>");
+        out.println("<div class='action-dropdown'><details><summary class='ui-button'>Add plan</summary><div class='action-panel'>");
         out.println("<form action='trip-details' method='post'>");
         out.println("<div>Date:</div><input type='date' name='activityDate' required><br>");
         out.println("<div>Type:</div><select name='type'>");

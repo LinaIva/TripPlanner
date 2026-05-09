@@ -21,6 +21,9 @@ public class FriendRequestsServlet extends HttpServlet {
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
         PageRenderer.renderPageStart(out, session, "Friend Requests", "friends");
+        out.println("<style>");
+        out.println(".request-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }");
+        out.println("</style>");
         out.println("<h2>Friend Requests</h2>");
         try {
             FriendDAO dao = new FriendDAO();
@@ -30,8 +33,9 @@ public class FriendRequestsServlet extends HttpServlet {
                 hasRequests = true;
                 int requestId = rs.getInt("id");
                 String username = rs.getString("username");
-                out.println("<p>" + username + " <a href='respond-friend-request?action=accept&id=" + requestId + "'>Accept</a>" +
-                        " <a href='respond-friend-request?action=decline&id=" + requestId + "'>Decline</a></p>");
+                out.println("<div class='request-row'><span>" + username + "</span>" +
+                        "<a class='ui-button small' href='respond-friend-request?action=accept&id=" + requestId + "'>Accept</a>" +
+                        "<a class='ui-button small' href='respond-friend-request?action=decline&id=" + requestId + "'>Decline</a></div>");
             }
             if (!hasRequests) out.println("<p>No new friend requests right now.</p>");
         } catch (Exception e) {

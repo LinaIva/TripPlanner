@@ -19,7 +19,10 @@ public class LoginServlet extends HttpServlet {
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
         out.println("<!DOCTYPE html>");
-        out.println("<html><body>");
+        out.println("<html><head><style>");
+        out.println("body { font-family: sans-serif; }");
+        out.println("input[type='submit'], button { padding: 2px 6px; border: 1px solid rgb(118,118,118); background: rgb(239,239,239); color: black; font: inherit; font-size: 13px; line-height: normal; cursor: pointer; }");
+        out.println("</style></head><body>");
         out.println("<h2>Travel Planner App</h2>");
         out.println("<form action='login' method='post'>");
         out.println("Username: <input type='text' name='username'><br>");
@@ -37,6 +40,11 @@ public class LoginServlet extends HttpServlet {
         boolean valid = userDAO.validateUser(username, password);
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
+        out.println("<!DOCTYPE html>");
+        out.println("<html><head><style>");
+        out.println("body { font-family: sans-serif; }");
+        out.println("input[type='submit'], button { padding: 2px 6px; border: 1px solid rgb(118,118,118); background: rgb(239,239,239); color: black; font: inherit; font-size: 13px; line-height: normal; cursor: pointer; }");
+        out.println("</style></head><body>");
         if (valid) {
             int userId = userDAO.getUserId(username);
             UserTracker.userLoggedIn(username);
@@ -70,5 +78,6 @@ public class LoginServlet extends HttpServlet {
             out.println("<h2>Invalid username or password</h2>");
             out.println("<a href='login'>Try again</a>");
         }
+        out.println("</body></html>");
     }
 }
