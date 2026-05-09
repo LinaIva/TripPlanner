@@ -30,3 +30,5 @@ AGENTS.md
 lectures/
 Assignment.pdf
 .DB_Store
+.env
+.env.local
