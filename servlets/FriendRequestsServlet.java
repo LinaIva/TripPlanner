@@ -6,6 +6,7 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import java.io.*;
 import java.sql.ResultSet;
+import util.PageRenderer;
 
 @WebServlet("/friend-requests")
 public class FriendRequestsServlet extends HttpServlet {
@@ -19,7 +20,7 @@ public class FriendRequestsServlet extends HttpServlet {
         int userId = (int) session.getAttribute("userId");
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
-        out.println("<html><body>");
+        PageRenderer.renderPageStart(out, session, "Friend Requests", "friends");
         out.println("<h2>Friend Requests</h2>");
         try {
             FriendDAO dao = new FriendDAO();
@@ -35,6 +36,6 @@ public class FriendRequestsServlet extends HttpServlet {
             e.printStackTrace();
         }
         out.println("<br><a href='friends'>Back to friends</a>");
-        out.println("</body></html>");
+        PageRenderer.renderPageEnd(out);
     }
 }

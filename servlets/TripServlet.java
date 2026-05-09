@@ -6,6 +6,7 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import java.io.*;
 import java.sql.ResultSet;
+import util.PageRenderer;
 
 @WebServlet("/trips")
 public class TripServlet extends HttpServlet {
@@ -17,16 +18,10 @@ public class TripServlet extends HttpServlet {
             return;
         }
         int userId = (int) session.getAttribute("userId");
-        String username = (String) session.getAttribute("username");
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
-        out.println("<html><body>");
-        out.println("<br><a href='friends'>Friends</a>");
+        PageRenderer.renderPageStart(out, session, "My Trips", "trips");
         out.println("<h2>Your Trips</h2>");
-        out.println("<p>Logged in as: " + username + "</p>");
-        out.println("<p>User ID: " + userId + "</p>");
-        out.println("<p>Session ID: " + session.getId() + "</p>");
-
         out.println("<h3>Create new trip</h3>");
         out.println("<form action='trips' method='post'>");
         out.println("Title: <input type='text' name='title' required><br>");
@@ -35,7 +30,6 @@ public class TripServlet extends HttpServlet {
         out.println("End date: <input type='date' name='endDate' required><br>");
         out.println("<input type='submit' value='Create Trip'>");
         out.println("</form>");
-        out.println("<h3>Saved trips</h3>");
         try {
             TripDAO tripDAO = new TripDAO();
             ResultSet rs = tripDAO.getTripsByUser(userId);
@@ -57,7 +51,7 @@ public class TripServlet extends HttpServlet {
             e.printStackTrace();
         }
         out.println("<br><a href='logout'>Logout</a>");
-        out.println("</body></html>");
+        PageRenderer.renderPageEnd(out);
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

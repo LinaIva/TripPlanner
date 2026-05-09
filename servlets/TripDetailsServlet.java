@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import jpa.TripNoteEntity;
 import jpa.TripNoteService;
 import java.util.List;
+import util.PageRenderer;
 
 @WebServlet("/trip-details")
 public class TripDetailsServlet extends HttpServlet {
@@ -42,15 +43,30 @@ public class TripDetailsServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         TripDAO tripDAO = new TripDAO();
         String tripTitle = tripDAO.getTripTitle(tripId);
-        out.println("<html><body>");
+        PageRenderer.renderPageStart(out, session, tripTitle, "trips");
+        out.println("<style>");
+        out.println(".section-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin: 24px 0 12px; }");
+        out.println(".section-header h3 { margin: 0; }");
+        out.println(".action-dropdown details { display: inline-block; }");
+        out.println(".action-dropdown summary { cursor: pointer; list-style: none; border: 1px solid black; padding: 8px 14px; }");
+        out.println(".action-dropdown summary::-webkit-details-marker { display: none; }");
+        out.println(".action-panel { margin-top: 8px; padding: 12px; border: 1px solid black; min-width: 320px; }");
+        out.println(".action-panel p { margin: 0 0 8px; }");
+        out.println(".action-panel form { margin: 0; }");
+        out.println(".action-panel input, .action-panel select { margin-bottom: 8px; }");
+        out.println(".members-list, .notes-list { padding-left: 18px; }");
+        out.println(".friend-option { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }");
+        out.println(".friend-option:last-child { margin-bottom: 0; }");
+        out.println(".inline-link { white-space: nowrap; }");
+        out.println("</style>");
         out.println("<h2>" + tripTitle + "</h2>");
-        out.println("<p>Trip ID: " + tripId + "</p>");
+//        out.println("<p>Trip ID: " + tripId + "</p>");
         out.println("<p><a href='leave-trip?tripId=" + tripId + "'>Leave this trip</a></p>");
         out.println("<h3>Trip members</h3>");
         try {
             TripMemberDAO memberDAO = new TripMemberDAO();
             ResultSet members = memberDAO.getTripMembers(tripId);
-            out.println("<ul>");
+            out.println("<ul class='members-list'>");
             while (members.next()) {
                 out.println("<li>" + members.getString("username") + "</li>");
             }
@@ -59,41 +75,27 @@ public class TripDetailsServlet extends HttpServlet {
             out.println("<p>Error loading trip members</p>");
             e.printStackTrace();
         }
-        out.println("<h3>Add friend to this trip</h3>");
+        out.println("<div class='action-dropdown'><details><summary>Add friend</summary><div class='action-panel'>");
         try {
             TripMemberDAO memberDAO = new TripMemberDAO();
             ResultSet friends = memberDAO.getUserFriends(currentUserId);
+            boolean hasFriendOption = false;
             while (friends.next()) {
                 int friendId = friends.getInt("id");
                 String friendName = friends.getString("username");
-                if (memberDAO.isMember(tripId, friendId)) {
-                    out.println("<p>" + friendName + "  Already added</p>");
-                } else {
-                    out.println("<p>" + friendName +
-                            " <a href='add-trip-member?tripId=" + tripId +
-                            "&friendId=" + friendId + "'>Add to trip</a></p>");
-                }
+                if (memberDAO.isMember(tripId, friendId)) continue;
+                hasFriendOption = true;
+                out.println("<div class='friend-option'><span>" + friendName + "</span>" +
+                        "<a class='inline-link' href='add-trip-member?tripId=" + tripId +
+                        "&friendId=" + friendId + "'>Add to trip</a></div>");
             }
+            if (!hasFriendOption) out.println("<p>No friends available to add.</p>");
         } catch (Exception e) {
             out.println("<p>Error loading friends</p>");
             e.printStackTrace();
         }
-        out.println("<h3>Add plan</h3>");
-        out.println("<form action='trip-details' method='post'>");
-        out.println("Date: <input type='date' name='activityDate' required><br>");
-        out.println("Type: <select name='type'>");
-        out.println("<option value='Hotel'>Hotel</option>");
-        out.println("<option value='Sightseeing'>Sightseeing</option>");
-        out.println("<option value='Food'>Food</option>");
-        out.println("<option value='Transport'>Transport</option>");
-        out.println("<option value='Other'>Other</option>");
-        out.println("</select><br>");
-        out.println("Title: <input type='text' name='title' required><br>");
-        out.println("Description: <input type='text' name='description'><br>");
-        out.println("Price: <input type='number' step='0.01' name='price' value='0'><br>");
-        out.println("<input type='submit' value='Add Activity'>");
-        out.println("</form>");
-        out.println("<h3>Trip Notes</h3>");
+        out.println("</div></details></div>");
+        out.println("<br><h3>Trip Notes</h3>");
 
         try {
             TripNoteService noteService = new TripNoteService();
@@ -103,9 +105,9 @@ public class TripDetailsServlet extends HttpServlet {
             out.println("Note: <input type='text' name='noteText' required>");
             out.println("<input type='submit' value='Add Note'>");
             out.println("</form>");
-            out.println("<ul>");
+            out.println("<ul class='notes-list'>");
             for (TripNoteEntity note : notes) {
-                out.println("<li>" + note.getNoteText() + " <small>(" + note.getCreatedAt() + ")</small></li>");
+                out.println("<li>" + note.getNoteText() + "</li>");
             }
             out.println("</ul>");
         } catch (Throwable e) {
@@ -131,11 +133,27 @@ public class TripDetailsServlet extends HttpServlet {
                 out.println("</tr>");
             }
             out.println("</table>");
-            out.println("<h3>Total price: " + total + "</h3>");
+            out.println("<br><h3>Total price: " + total + "</h3>");
         } catch (Exception e) {
             out.println("<p>Error loading activities</p>");
             e.printStackTrace();
         }
+        out.println("<div class='action-dropdown'><details><summary>Add plan</summary><div class='action-panel'>");
+        out.println("<form action='trip-details' method='post'>");
+        out.println("<div>Date:</div><input type='date' name='activityDate' required><br>");
+        out.println("<div>Type:</div><select name='type'>");
+        out.println("<option value='Hotel'>Hotel</option>");
+        out.println("<option value='Sightseeing'>Sightseeing</option>");
+        out.println("<option value='Food'>Food</option>");
+        out.println("<option value='Transport'>Transport</option>");
+        out.println("<option value='Other'>Other</option>");
+        out.println("</select><br>");
+        out.println("<div>Title:</div><input type='text' name='title' required><br>");
+        out.println("<div>Description:</div><input type='text' name='description'><br>");
+        out.println("<div>Price:</div><input type='number' step='0.01' name='price' value='0'><br>");
+        out.println("<input type='submit' value='Add Activity'>");
+        out.println("</form>");
+        out.println("</div></details></div>");
         out.println("<br><a href='trips'>Back to trips</a>");
         out.println("<br><a href='logout'>Logout</a>");
         String username = (String) session.getAttribute("username");
@@ -200,7 +218,7 @@ public class TripDetailsServlet extends HttpServlet {
         out.println("  }");
         out.println("}");
         out.println("</script>");
-        out.println("</body></html>");
+        PageRenderer.renderPageEnd(out);
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

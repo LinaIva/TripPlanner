@@ -6,6 +6,7 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import java.io.*;
 import java.sql.ResultSet;
+import util.PageRenderer;
 
 @WebServlet("/friends")
 public class FriendsServlet extends HttpServlet {
@@ -19,13 +20,13 @@ public class FriendsServlet extends HttpServlet {
         int userId = (int) session.getAttribute("userId");
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
-        out.println("<html><body>");
+        PageRenderer.renderPageStart(out, session, "Friends", "friends");
         out.println("<h2>Friends</h2>");
         out.println("<form action='friends' method='post'>");
         out.println("Search username: <input type='text' name='search'>");
         out.println("<input type='submit' value='Search'>");
         out.println("</form>");
-        out.println("<h3>Your friends</h3>");
+        out.println("<br><h3>Your friends</h3>");
         try {
             FriendDAO dao = new FriendDAO();
             ResultSet friends = dao.getFriends(userId);
@@ -40,7 +41,7 @@ public class FriendsServlet extends HttpServlet {
         }
         out.println("<br><a href='friend-requests'>Friend requests</a>");
         out.println("<br><a href='trips'>Back to trips</a>");
-        out.println("</body></html>");
+        PageRenderer.renderPageEnd(out);
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -53,7 +54,7 @@ public class FriendsServlet extends HttpServlet {
         String search = request.getParameter("search");
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
-        out.println("<html><body>");
+        PageRenderer.renderPageStart(out, session, "Friends", "friends");
         out.println("<h2>Search results</h2>");
         try {
             FriendDAO dao = new FriendDAO();
@@ -68,6 +69,6 @@ public class FriendsServlet extends HttpServlet {
             e.printStackTrace();
         }
         out.println("<br><a href='friends'>Back</a>");
-        out.println("</body></html>");
+        PageRenderer.renderPageEnd(out);
     }
 }
