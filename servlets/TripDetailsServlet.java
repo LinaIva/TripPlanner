@@ -43,6 +43,7 @@ public class TripDetailsServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         TripDAO tripDAO = new TripDAO();
         String tripTitle = tripDAO.getTripTitle(tripId);
+        String tripDateRange = tripDAO.getTripDateRange(tripId);
         PageRenderer.renderPageStart(out, session, tripTitle, "trips");
         out.println("<style>");
         out.println(".section-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin: 24px 0 12px; }");
@@ -58,8 +59,11 @@ public class TripDetailsServlet extends HttpServlet {
         out.println(".friend-option { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }");
         out.println(".friend-option:last-child { margin-bottom: 0; }");
         out.println(".inline-link { white-space: nowrap; }");
+        out.println(".delete-form { margin: 0; }");
+        out.println(".delete-form input { margin: 0; }");
         out.println("</style>");
         out.println("<h2>" + tripTitle + "</h2>");
+        out.println("<p>" + tripDateRange + "</p>");
 //        out.println("<p>Trip ID: " + tripId + "</p>");
         out.println("<p><a href='leave-trip?tripId=" + tripId + "'>Leave this trip</a></p>");
         out.println("<h3>Trip members</h3>");
@@ -120,7 +124,7 @@ public class TripDetailsServlet extends HttpServlet {
             ActivityDAO dao = new ActivityDAO();
             ResultSet rs = dao.getActivitiesByTrip(tripId);
             out.println("<table border='1'>");
-            out.println("<tr><th>Date</th><th>Type</th><th>Title</th><th>Description</th><th>Price</th></tr>");
+            out.println("<tr><th>Date</th><th>Type</th><th>Title</th><th>Description</th><th>Price</th><th></th></tr>");
             while (rs.next()) {
                 double price = rs.getDouble("price");
                 total += price;
@@ -130,6 +134,10 @@ public class TripDetailsServlet extends HttpServlet {
                 out.println("<td>" + rs.getString("title") + "</td>");
                 out.println("<td>" + rs.getString("description") + "</td>");
                 out.println("<td>" + price + "</td>");
+                out.println("<td><form class='delete-form' action='trip-details' method='post'>" +
+                        "<input type='hidden' name='action' value='deleteActivity'>" +
+                        "<input type='hidden' name='activityId' value='" + rs.getInt("id") + "'>" +
+                        "<input type='submit' value='Delete'></form></td>");
                 out.println("</tr>");
             }
             out.println("</table>");
@@ -247,10 +255,32 @@ public class TripDetailsServlet extends HttpServlet {
             response.sendRedirect("trip-details");
             return;
         }
+        if ("deleteActivity".equals(action)) {
+            try {
+                int activityId = Integer.parseInt(request.getParameter("activityId"));
+                ActivityDAO dao = new ActivityDAO();
+                dao.deleteActivity(activityId, tripId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            response.sendRedirect("trip-details");
+            return;
+        }
         String activityDate = request.getParameter("activityDate");
         String type = request.getParameter("type");
         String title = request.getParameter("title");
         String description = request.getParameter("description");
+        TripDAO tripDAO = new TripDAO();
+        if (!tripDAO.isActivityDateWithinTrip(tripId, activityDate)) {
+            response.setContentType("text/html");
+            PrintWriter out = response.getWriter();
+            PageRenderer.renderPageStart(out, session, "Invalid activity date", "trips");
+            out.println("<h2>Invalid activity date</h2>");
+            out.println("<p>The plan date must be inside the trip date range.</p>");
+            out.println("<p><a href='trip-details?tripId=" + tripId + "'>Back to trip</a></p>");
+            PageRenderer.renderPageEnd(out);
+            return;
+        }
         double price = 0;
         try {
             price = Double.parseDouble(request.getParameter("price"));

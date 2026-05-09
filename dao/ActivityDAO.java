@@ -29,4 +29,15 @@ public class ActivityDAO {
         ps.setInt(1, tripId);
         return ps.executeQuery();
     }
+
+    public void deleteActivity(int activityId, int tripId) {
+        String sql = "DELETE FROM activities WHERE id = ? AND trip_id = ?";
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, activityId);
+            ps.setInt(2, tripId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

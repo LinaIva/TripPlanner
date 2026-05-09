@@ -30,6 +30,7 @@ public class TripServlet extends HttpServlet {
         out.println("End date: <input type='date' name='endDate' required><br>");
         out.println("<input type='submit' value='Create Trip'>");
         out.println("</form>");
+        out.println("<br>");
         try {
             TripDAO tripDAO = new TripDAO();
             ResultSet rs = tripDAO.getTripsByUser(userId);

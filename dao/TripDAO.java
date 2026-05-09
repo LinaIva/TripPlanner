@@ -1,9 +1,11 @@
 package dao;
 
 import database.DBConnection;
+import java.sql.Date;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
 
 public class TripDAO {
 
@@ -52,5 +54,33 @@ public class TripDAO {
             e.printStackTrace();
         }
         return "Unknown Trip";
+    }
+
+    public String getTripDateRange(int tripId) {
+        String sql = "SELECT start_date, end_date FROM trips WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, tripId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getDate("start_date") + " - " + rs.getDate("end_date");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public boolean isActivityDateWithinTrip(int tripId, String activityDate) {
+        String sql = "SELECT start_date, end_date FROM trips WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, tripId);
+            ResultSet rs = ps.executeQuery();
+            if (!rs.next()) return false;
+            LocalDate selectedDate = LocalDate.parse(activityDate);
+            LocalDate startDate = rs.getDate("start_date").toLocalDate();
+            LocalDate endDate = rs.getDate("end_date").toLocalDate();
+            return !selectedDate.isBefore(startDate) && !selectedDate.isAfter(endDate);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
