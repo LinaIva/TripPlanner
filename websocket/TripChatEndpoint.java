@@ -23,21 +23,16 @@ public class TripChatEndpoint {
     public void onMessage(String fullMessage, Session session, @PathParam("tripId") String tripId) {
         if (fullMessage == null || fullMessage.trim().isEmpty()) return;
         if (fullMessage.length() > 500) return;
-
         String username = "unknown";
         String message = fullMessage;
-
         if (fullMessage.contains(": ")) {
             String[] parts = fullMessage.split(": ", 2);
             username = parts[0];
             message = parts[1];
         }
-
         ChatMessageDAO dao = new ChatMessageDAO();
         dao.saveMessage(Integer.parseInt(tripId), username, message);
-
         Set<Session> sessions = tripChats.get(tripId);
-
         if (sessions != null) {
             for (Session s : sessions) {
                 if (s.isOpen()) {

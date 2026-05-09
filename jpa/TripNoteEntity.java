@@ -20,8 +20,7 @@ public class TripNoteEntity {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public TripNoteEntity() {
-    }
+    public TripNoteEntity() { }
 
     public TripNoteEntity(int tripId, String noteText) {
         this.tripId = tripId;
